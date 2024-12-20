@@ -28,9 +28,14 @@ export class RoomService {
     }
 
     async findById(id: string){
-        return this.roomModel
-            .findById( id ).exec()
-            .catch( () => { return null; });
+        const result = await this.roomModel
+            .find({ _id: id, isDeleted: null })
+            .exec()
+            .catch(() => {
+                return null;
+            });
+        if (!result || result.length === 0) return undefined;
+        return result?.[0];
     }
 
     async update(id: string, dto: RoomDto) {
@@ -49,6 +54,14 @@ export class RoomService {
                 { roomId: id },
                 { status: ScheduleStatus.Deleted }
             ).exec();
+        }
+        return deleted;
+    }
+
+    async hardDelete(id: string) {
+        const deleted = await this.roomModel.deleteOne({ _id: id }).exec();
+        if (deleted) {
+            await this.scheduleModel.updateMany({ roomId: id }).exec();
         }
         return deleted;
     }

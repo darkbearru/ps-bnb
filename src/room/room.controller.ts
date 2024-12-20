@@ -36,7 +36,9 @@ export class RoomController {
         if (!room) {
             throw new HttpException(ROOM_NOT_FOUND, HttpStatus.NOT_FOUND);
         }
-        return this.roomService.update(id, dto);
+        if (await this.roomService.update(id, dto)) {
+            return this.roomService.findById(id);
+        }
     }
 
     @Delete(':id')
@@ -46,5 +48,14 @@ export class RoomController {
             throw new HttpException(ROOM_NOT_FOUND, HttpStatus.NOT_FOUND);
         }
         return this.roomService.delete(id);
+    }
+
+    @Delete('delete/:id')
+    async hardDelete(@Param('id') id: string) {
+        const deleted = await this.roomService.hardDelete(id);
+        if (!deleted) {
+            throw new HttpException(ROOM_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
+        return deleted;
     }
 }

@@ -36,6 +36,12 @@ export class ScheduleController {
         return this.scheduleService.changeStatus(id, ScheduleStatus.Deleted);
     }
 
+    @Delete('/delete/:id')
+    async hardDelete(@Param('id') id: string) {
+        await this.checkId(id);
+        return this.scheduleService.hardDelete(id);
+    }
+
     @Patch('updateStatus/:id/:status')
     async updateStatus(
         @Param('id') id: string,
