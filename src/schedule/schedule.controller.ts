@@ -1,6 +1,22 @@
-import { Body, Controller, Delete, HttpException, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    HttpException,
+    HttpStatus,
+    Param,
+    Patch,
+    Post,
+    UsePipes,
+    ValidationPipe,
+} from '@nestjs/common';
 import { ScheduleService } from './schedule.service';
-import { SCHEDULE_CREATE_ERROR, SCHEDULE_NOT_FOUND, SCHEDULE_STATUS_ERROR } from './schedule.constants';
+import {
+    SCHEDULE_CREATE_ERROR,
+    SCHEDULE_NOT_FOUND,
+    SCHEDULE_STATUS_ERROR,
+    SCHEDULE_UPDATE_ERROR,
+} from './schedule.constants';
 import { ScheduleStatus } from './schedule.types';
 import { ScheduleDto } from './dto/schedule.dto';
 
@@ -9,6 +25,7 @@ export class ScheduleController {
 
     constructor(private readonly scheduleService: ScheduleService) {}
 
+    @UsePipes(new ValidationPipe())
     @Post('create')
     async create(@Body() dto: ScheduleDto) {
         const check = await this.scheduleService.checkRoom(dto);
@@ -23,11 +40,16 @@ export class ScheduleController {
         return added;
     }
 
+    @UsePipes(new ValidationPipe())
     @Patch(':id')
     async update(@Param('id') id: string, @Body() dto: ScheduleDto) {
         await this.checkId(id);
         dto.status = ScheduleStatus.Pending;
-        return this.scheduleService.update(id, dto);
+        const result = await this.scheduleService.update(id, dto);
+        if (!result) {
+            throw new HttpException(SCHEDULE_UPDATE_ERROR, HttpStatus.BAD_REQUEST);
+        }
+        return result;
     }
 
     @Delete(':id')

@@ -8,6 +8,7 @@ import { ScheduleStatus } from './schedule.types';
 import { Model } from 'mongoose';
 import { ScheduleDto } from './dto/schedule.dto';
 
+
 @Injectable()
 export class ScheduleService {
 
@@ -23,40 +24,51 @@ export class ScheduleService {
     }
 
     async checkRoom(dto: ScheduleDto) {
-        const startAt = new Date(dto.startAt);
-        const endAt = new Date(dto.endAt);
 
         return this.scheduleModel
             .findOne({
+                ...this.makeDateCheckCondition(dto),
                 roomId: dto.roomId,
                 status: { $lt: ScheduleStatus.Canceled },
-                $or: [
-                    {
-                        startAt: { $gte: startAt },
-                        $and: [
-                            { startAt: { $lte: endAt } },
-                            { endAt: { $gte: endAt } },
-                        ],
-                    },
-                    {
-                        startAt: { $lte: startAt },
-                        endAt: { $gte: endAt },
-                    },
-                    {
-                        startAt: { $gte: startAt },
-                        endAt: { $lte: endAt },
-                    },
-                    {
-                        $and: [
-                            { startAt: { $lte: startAt } },
-                            { endAt: { $gte: startAt } },
-                        ],
-                        endAt: { $lte: endAt },
-                    },
-                ],
             })
             .exec();
     }
+
+    private makeDateCheckCondition(dto: ScheduleDto) {
+        const startAt = new Date(dto.startAt);
+        const endAt = new Date(dto.endAt);
+        return {
+            $or: [
+                {
+                    $and: [
+                        { startAt: { $gte: startAt } },
+                        { startAt: { $lte: endAt } },
+                        { endAt: { $gte: endAt } },
+                    ],
+                },
+                {
+                    $and: [
+                        { startAt: { $lte: startAt } },
+                        { endAt: { $gte: endAt } },
+                    ]
+                },
+                {
+                    $and: [
+                        { startAt: { $gte: startAt } },
+                        { endAt: { $lte: endAt } },
+                    ]
+                },
+                {
+                    $and: [
+                        { startAt: { $lte: startAt } },
+                        { endAt: { $gte: startAt } },
+                        { endAt: { $lte: endAt } },
+                    ],
+                },
+            ],
+        }
+    }
+
 
     async findById(id: string): Promise<ScheduleModel> {
         return this.scheduleModel
@@ -68,7 +80,18 @@ export class ScheduleService {
     }
 
     async update(id: string, dto: ScheduleDto) {
-        return this.scheduleModel.updateOne({ _id: id }, dto);
+        const check = await this.scheduleModel
+            .findOne({
+                _id: { $ne: id },
+                ...this.makeDateCheckCondition(dto),
+                roomId: dto.roomId,
+                status: { $lt: ScheduleStatus.Canceled },
+            })
+            .exec();
+        if (check) return;
+        return this.scheduleModel.updateOne({
+            _id: id,
+        }, dto);
     }
 
     async changeStatus(id: string, status: ScheduleStatus) {

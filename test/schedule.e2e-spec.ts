@@ -11,8 +11,8 @@ let roomId: string = new Types.ObjectId().toHexString();
 let scheduleId: string;
 
 const scheduleDto: ScheduleDto = {
-    startAt: "2024-12-16",
-    endAt: "2024-12-18",
+    startAt: "2025-02-16",
+    endAt: "2025-02-25",
     status: ScheduleStatus.Pending,
     roomId,
 }
@@ -41,11 +41,46 @@ describe('Schedule (e2e)', () => {
             })
     });
 
+    it('/api/schedule/create (Post): fail', async () => {
+        return request(app.getHttpServer())
+            .post('/api/schedule/create')
+            .send({ ...scheduleDto, startAt: "2024-12-16", })
+            .expect(400);
+    });
+
+    it('/api/schedule/create (Post): fail', async () => {
+        return request(app.getHttpServer())
+            .post('/api/schedule/create')
+            .send({ ...scheduleDto, startAt: "2025-02-16", endAt: "2025-02-18" })
+            .expect(400);
+    });
+
+    it('/api/schedule/create (Post): fail', async () => {
+        return request(app.getHttpServer())
+            .post('/api/schedule/create')
+            .send({ ...scheduleDto, startAt: "2025-02-18", endAt: "2025-02-28" })
+            .expect(400);
+    });
+
+    it('/api/schedule/create (Post): fail', async () => {
+        return request(app.getHttpServer())
+            .post('/api/schedule/create')
+            .send({ ...scheduleDto, startAt: "2025-02-01", endAt: "2025-02-18" })
+            .expect(400);
+    });
+
     it('/api/schedule/:id (Patch): success', async () => {
         return request(app.getHttpServer())
             .patch(`/api/schedule/${scheduleId}`)
-            .send({ endAt: "2024-12-17" })
+            .send({...scheduleDto, endAt: "2025-02-20" })
             .expect(200)
+    });
+
+    it('/api/schedule/:id (Patch): fail', async () => {
+        return request(app.getHttpServer())
+            .patch(`/api/schedule/${scheduleId}`)
+            .send({...scheduleDto, status: 6 })
+            .expect(400)
     });
 
     it('/api/schedule/updateStatus/:id/:status (Patch): success', async () => {
@@ -54,13 +89,13 @@ describe('Schedule (e2e)', () => {
             .expect(200)
     });
 
-    it('/api/schedule/:id (Delete): success', async () => {
+    it('/api/schedule/:id (Soft Delete): success', async () => {
         return request(app.getHttpServer())
             .delete(`/api/schedule/${scheduleId}`)
             .expect(200)
     });
 
-    it('/api/schedule/delete/:id (Delete): success', async () => {
+    it('/api/schedule/delete/:id (Hard Delete): success', async () => {
         return request(app.getHttpServer())
             .delete(`/api/schedule/delete/${scheduleId}`)
             .expect(200)

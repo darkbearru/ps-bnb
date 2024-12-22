@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpException,
+    HttpStatus,
+    Param,
+    Patch,
+    Post,
+    UsePipes,
+    ValidationPipe,
+} from '@nestjs/common';
 import { RoomDto } from './dto/room.dto';
 import { RoomService } from './room.service';
 import { ROOM_CREATE_ERROR, ROOM_NOT_FOUND } from './room.constants';
@@ -7,6 +19,7 @@ import { ROOM_CREATE_ERROR, ROOM_NOT_FOUND } from './room.constants';
 export class RoomController {
     constructor(private readonly roomService: RoomService) {}
 
+    @UsePipes(new ValidationPipe())
     @Post('create')
     async create(@Body() dto: RoomDto) {
         const createdRoom = await this.roomService.create(dto);
@@ -30,6 +43,7 @@ export class RoomController {
         return room;
     }
 
+    @UsePipes(new ValidationPipe())
     @Patch(':id')
     async update(@Param('id') id: string, @Body() dto: RoomDto) {
         const room = await this.roomService.findById(id);

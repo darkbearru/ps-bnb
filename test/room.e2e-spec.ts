@@ -41,6 +41,34 @@ describe('Room (e2e)', () => {
             })
     });
 
+    it('/api/room/create (Post): num, fail',() => {
+        return request(app.getHttpServer())
+            .post('/api/room/create')
+            .send({ ...roomDto, num: "12" })
+            .expect(400);
+    });
+
+    it('/api/room/create (Post): type, fail',() => {
+        return request(app.getHttpServer())
+            .post('/api/room/create')
+            .send({ ...roomDto, type: 5 })
+            .expect(400);
+    });
+
+    it('/api/room/create (Post): square, fail',() => {
+        return request(app.getHttpServer())
+            .post('/api/room/create')
+            .send({ ...roomDto, square: 5 })
+            .expect(400);
+    });
+
+    it('/api/room/create (Post): amenities, fail',() => {
+        return request(app.getHttpServer())
+            .post('/api/room/create')
+            .send({ ...roomDto, amenities: 5 })
+            .expect(400);
+    });
+
     it('/api/room/all (Get): success', async () => {
         return request(app.getHttpServer())
             .get(`/api/room/all`)
@@ -59,7 +87,7 @@ describe('Room (e2e)', () => {
     it('/api/room/:id (patch): update', async () => {
         return request(app.getHttpServer())
             .patch(`/api/room/${roomId}`)
-            .send({ name: 'Правка' })
+            .send({ ...roomDto, name: 'Правка' })
             .expect(200)
             .then(({ body }: request.Response) => {
                 expect(body.name).toBe('Правка');
