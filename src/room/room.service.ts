@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { RoomDocument, RoomModel } from './room.model/room.model';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { RoomDto } from './dto/room.dto';
+import { CreateRoomDto } from './dto/create.room.dto';
 import { ScheduleDocument, ScheduleModel } from '../schedule/schedule.model/schedule.model';
 import { ScheduleStatus } from '../schedule/schedule.types';
+import { UpdateRoomDto } from './dto/update-room.dto';
 
 @Injectable()
 export class RoomService {
@@ -17,10 +18,8 @@ export class RoomService {
     ) {
     }
 
-    async create(dto: RoomDto) {
-        return this.roomModel
-            .create(dto)
-            .catch( () => { return null; });
+    async create(dto: CreateRoomDto) {
+        return this.roomModel.create(dto);
     }
 
     async getAll(): Promise<RoomModel[]> {
@@ -29,12 +28,13 @@ export class RoomService {
 
     async findById(id: string){
         return this.roomModel
-            .findById( id ).exec()
-            .catch( () => { return null; });
+            .findById( id ).exec();
     }
 
-    async update(id: string, dto: RoomDto) {
-        return this.roomModel.updateOne({ _id: id }, { $set: dto }).exec();
+    async update(id: string, dto: UpdateRoomDto) {
+        return this.roomModel
+            .updateOne({ _id: id }, { $set: dto })
+            .exec();
     }
 
     async delete(id: string){

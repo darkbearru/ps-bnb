@@ -1,6 +1,6 @@
 import { RoomTypes } from '../room.types';
 
-export class RoomDto {
+export class UpdateRoomDto {
     num: number;
     type: RoomTypes;
     name: string;
