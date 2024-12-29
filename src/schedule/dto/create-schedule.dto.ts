@@ -1,7 +1,6 @@
-import { ScheduleStatus } from '../schedule.types';
 import { IsDateString, IsEnum, IsOptional, IsString, MinDate, ValidateIf } from 'class-validator';
 
-export class ScheduleDto {
+export class CreateScheduleDto {
     @IsDateString()
     @MinDate(
         new Date(),
@@ -18,8 +17,4 @@ export class ScheduleDto {
 
     @IsString()
     roomId: string;
-
-    @IsEnum(ScheduleStatus)
-    @IsOptional()
-    status?: ScheduleStatus;
 }

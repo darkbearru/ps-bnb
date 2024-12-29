@@ -11,9 +11,10 @@ import {
     UsePipes,
     ValidationPipe,
 } from '@nestjs/common';
-import { RoomDto } from './dto/room.dto';
+import { CreateRoomDto } from './dto/create-room.dto';
 import { RoomService } from './room.service';
 import { ROOM_CREATE_ERROR, ROOM_NOT_FOUND } from './room.constants';
+import { UpdateRoomDto } from './dto/update-room.dto';
 
 @Controller('room')
 export class RoomController {
@@ -21,7 +22,7 @@ export class RoomController {
 
     @UsePipes(new ValidationPipe())
     @Post('create')
-    async create(@Body() dto: RoomDto) {
+    async create(@Body() dto: CreateRoomDto) {
         const createdRoom = await this.roomService.create(dto);
         if (!createdRoom) {
             throw new HttpException(ROOM_CREATE_ERROR, HttpStatus.BAD_REQUEST);
@@ -45,7 +46,7 @@ export class RoomController {
 
     @UsePipes(new ValidationPipe())
     @Patch(':id')
-    async update(@Param('id') id: string, @Body() dto: RoomDto) {
+    async update(@Param('id') id: string, @Body() dto: UpdateRoomDto) {
         const room = await this.roomService.findById(id);
         if (!room) {
             throw new HttpException(ROOM_NOT_FOUND, HttpStatus.NOT_FOUND);

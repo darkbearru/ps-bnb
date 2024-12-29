@@ -18,7 +18,8 @@ import {
     SCHEDULE_UPDATE_ERROR,
 } from './schedule.constants';
 import { ScheduleStatus } from './schedule.types';
-import { ScheduleDto } from './dto/schedule.dto';
+import { CreateScheduleDto } from './dto/create-schedule.dto';
+import { UpdateScheduleDto } from './dto/update-schedule.dto';
 
 @Controller('schedule')
 export class ScheduleController {
@@ -27,12 +28,11 @@ export class ScheduleController {
 
     @UsePipes(new ValidationPipe())
     @Post('create')
-    async create(@Body() dto: ScheduleDto) {
+    async create(@Body() dto: CreateScheduleDto) {
         const check = await this.scheduleService.checkRoom(dto);
         if (check) {
             throw new HttpException(SCHEDULE_CREATE_ERROR, HttpStatus.BAD_REQUEST);
         }
-        dto.status = ScheduleStatus.Pending;
         const added = await this.scheduleService.create(dto);
         if (!added) {
             throw new HttpException(SCHEDULE_CREATE_ERROR, HttpStatus.BAD_REQUEST);
@@ -42,9 +42,8 @@ export class ScheduleController {
 
     @UsePipes(new ValidationPipe())
     @Patch(':id')
-    async update(@Param('id') id: string, @Body() dto: ScheduleDto) {
+    async update(@Param('id') id: string, @Body() dto: UpdateScheduleDto) {
         await this.checkId(id);
-        dto.status = ScheduleStatus.Pending;
         const result = await this.scheduleService.update(id, dto);
         if (!result) {
             throw new HttpException(SCHEDULE_UPDATE_ERROR, HttpStatus.BAD_REQUEST);
@@ -55,7 +54,7 @@ export class ScheduleController {
     @Delete(':id')
     async delete(@Param('id') id: string) {
         await this.checkId(id);
-        return this.scheduleService.changeStatus(id, ScheduleStatus.Deleted);
+        return this.scheduleService.delete(id);
     }
 
     @Delete('/delete/:id')
