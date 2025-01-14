@@ -1,18 +1,19 @@
-import { IsDateString, IsEnum, IsOptional, IsString, MinDate, ValidateIf } from 'class-validator';
+import { IsDateString, IsString, MinDate, ValidateIf } from 'class-validator';
+import { SCHEDULE_NOT_DATE_ERROR, SCHEDULE_START_AT_ERROR, SCHEDULE_START_IF_ERROR } from '../schedule.constants';
 
 export class CreateScheduleDto {
-    @IsDateString()
+    @IsDateString({}, { message: SCHEDULE_NOT_DATE_ERROR })
     @MinDate(
         new Date(),
-        { message: 'Дата начала бронирования не может быть меньше текущей' }
+        { message: SCHEDULE_START_AT_ERROR }
     )
     @ValidateIf(
         o => new Date(o.endAt).getTime() < new Date(o.startAt).getTime(),
-        { message: 'Дата начала бронирования не может быть больше даты окончания бронирования'}
+        { message: SCHEDULE_START_IF_ERROR }
     )
     startAt: string;
 
-    @IsDateString()
+    @IsDateString({}, { message: SCHEDULE_NOT_DATE_ERROR })
     endAt: string;
 
     @IsString()

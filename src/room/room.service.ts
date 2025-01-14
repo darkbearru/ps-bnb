@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { RoomDocument, RoomModel } from './room.model/room.model';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CreateRoomDto } from './dto/create.room.dto';
+import { CreateRoomDto } from './dto/create-room.dto';
 import { ScheduleDocument, ScheduleModel } from '../schedule/schedule.model/schedule.model';
 import { ScheduleStatus } from '../schedule/schedule.types';
 import { UpdateRoomDto } from './dto/update-room.dto';

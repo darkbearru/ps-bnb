@@ -1,10 +1,20 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post } from '@nestjs/common';
-import { CreateRoomDto } from './dto/create.room.dto';
+import {
+    BadRequestException,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    InternalServerErrorException,
+    NotFoundException,
+    Param,
+    Patch,
+    Post, UsePipes, ValidationPipe,
+} from '@nestjs/common';
+import { CreateRoomDto } from './dto/create-room.dto';
 import { RoomService } from './room.service';
-import { ROOM_CREATE_ERROR, ROOM_DELETE_ERROR, ROOM_NOT_FOUND, ROOM_UPDATE_ERROR } from './room.constants';
+import { ROOM_CREATE_ERROR, ROOM_DELETE_ERROR, ROOM_NOT_FOUND_ERROR, ROOM_UPDATE_ERROR } from './room.constants';
 import { UpdateRoomDto } from './dto/update-room.dto';
-import { Model } from 'mongoose';
-import { RoomDocument, RoomModel } from './room.model/room.model';
+import { RoomModel } from './room.model/room.model';
 
 @Controller('room')
 export class RoomController {
@@ -19,7 +29,7 @@ export class RoomController {
         } catch (error) {
         }
         if (!createdRoom) {
-            throw new HttpException(ROOM_CREATE_ERROR, HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(ROOM_CREATE_ERROR);
         }
         return createdRoom;
     }
@@ -29,7 +39,7 @@ export class RoomController {
         try {
             return await this.roomService.getAll();
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException(error.message);
         }
     }
 
@@ -40,7 +50,7 @@ export class RoomController {
             room = await this.roomService.findById(id);
         } catch (error) {}
         if (!room) {
-            throw new NotFoundException(ROOM_NOT_FOUND);
+            throw new NotFoundException(ROOM_NOT_FOUND_ERROR);
         }
         return room;
     }
@@ -53,14 +63,14 @@ export class RoomController {
             room = await this.roomService.findById(id);
         } catch (error) {}
         if (!room) {
-            throw new NotFoundException(ROOM_NOT_FOUND);
+            throw new NotFoundException(ROOM_NOT_FOUND_ERROR);
         }
         try {
             if (await this.roomService.update(id, dto)) {
                 return this.roomService.findById(id);
             }
         } catch (error) {
-            throw new HttpException(ROOM_UPDATE_ERROR, HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(ROOM_UPDATE_ERROR);
         }
     }
 
@@ -71,12 +81,12 @@ export class RoomController {
             room = await this.roomService.findById(id);
         } catch (error) {}
         if (!room) {
-            throw new NotFoundException(ROOM_NOT_FOUND);
+            throw new NotFoundException(ROOM_NOT_FOUND_ERROR);
         }
         try {
             return await this.roomService.delete(id);
         } catch (error) {
-            throw new HttpException(ROOM_DELETE_ERROR, HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(ROOM_DELETE_ERROR);
         }
     }
 
@@ -84,7 +94,7 @@ export class RoomController {
     async hardDelete(@Param('id') id: string) {
         const deleted = await this.roomService.hardDelete(id);
         if (!deleted) {
-            throw new HttpException(ROOM_NOT_FOUND, HttpStatus.NOT_FOUND);
+            throw new NotFoundException(ROOM_NOT_FOUND_ERROR);
         }
         return deleted;
     }

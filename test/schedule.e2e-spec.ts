@@ -3,19 +3,19 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { disconnect, Types } from 'mongoose';
-import { ScheduleDto } from '../src/schedule/dto/schedule.dto';
-import { ScheduleStatus } from '../src/schedule/schedule.types';
+import { CreateScheduleDto } from '../src/schedule/dto/create-schedule.dto';
+import { SCHEDULE_CREATE_ERROR, SCHEDULE_NOT_DATE_ERROR } from '../src/schedule/schedule.constants';
 
 
 let roomId: string = new Types.ObjectId().toHexString();
 let scheduleId: string;
 
-const scheduleDto: ScheduleDto = {
+const scheduleDto: CreateScheduleDto = {
     startAt: "2025-02-16",
     endAt: "2025-02-25",
-    status: ScheduleStatus.Pending,
     roomId,
 }
+
 
 describe('Schedule (e2e)', () => {
     let app: INestApplication;
@@ -41,11 +41,25 @@ describe('Schedule (e2e)', () => {
             })
     });
 
+    it('/api/schedule/create (Post): fail, startAt', async () => {
+        return request(app.getHttpServer())
+            .post('/api/schedule/create')
+            .send({ ...scheduleDto, startAt: '252010' })
+            .expect(400)
+            .then(({ body }: request.Response) => {
+                expect(body.message.indexOf(SCHEDULE_NOT_DATE_ERROR)).not.toBe(-1);
+            });
+    });
+
     it('/api/schedule/create (Post): fail', async () => {
         return request(app.getHttpServer())
             .post('/api/schedule/create')
             .send({ ...scheduleDto, startAt: "2024-12-16", })
-            .expect(400);
+            .expect(400)
+            .then(({ body }: request.Response) => {
+                expect(body.message.indexOf(SCHEDULE_CREATE_ERROR)).not.toBe(-1);
+            });
+
     });
 
     it('/api/schedule/create (Post): fail', async () => {
@@ -79,8 +93,8 @@ describe('Schedule (e2e)', () => {
     it('/api/schedule/:id (Patch): fail', async () => {
         return request(app.getHttpServer())
             .patch(`/api/schedule/${scheduleId}`)
-            .send({...scheduleDto, status: 6 })
-            .expect(400)
+            .send({ ...scheduleDto, startAt: "2025-02-21", endAt: "2025-02-18" })
+            .expect(400);
     });
 
     it('/api/schedule/updateStatus/:id/:status (Patch): success', async () => {
