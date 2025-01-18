@@ -82,7 +82,6 @@ export class ScheduleService {
             })
             .exec();
         if (check) return;
-
         return this.scheduleModel.updateOne(
             { _id: id },
             { ...dto, status: ScheduleStatus.Pending },
@@ -95,5 +94,9 @@ export class ScheduleService {
 
     async changeStatus(id: string, status: ScheduleStatus) {
         return this.scheduleModel.updateOne({ _id: id }, { status });
+    }
+
+    async hardDelete(id: string) {
+        return this.scheduleModel.deleteOne({ _id: id });
     }
 }

@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, HttpException, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    HttpException,
+    HttpStatus,
+    Param,
+    Patch,
+    Post,
+    UsePipes,
+    ValidationPipe,
+} from '@nestjs/common';
 import { ScheduleService } from './schedule.service';
 import {
     SCHEDULE_CREATE_ERROR, SCHEDULE_DELETE_ERROR,
@@ -16,6 +27,7 @@ export class ScheduleController {
 
     constructor(private readonly scheduleService: ScheduleService) {}
 
+    @UsePipes(new ValidationPipe())
     @Post('create')
     async create(@Body() dto: CreateScheduleDto) {
         let check: ScheduleModel;
@@ -37,6 +49,7 @@ export class ScheduleController {
         return added;
     }
 
+    @UsePipes(new ValidationPipe())
     @Patch(':id')
     async update(@Param('id') id: string, @Body() dto: UpdateScheduleDto) {
         await this.checkId(id);
@@ -55,6 +68,12 @@ export class ScheduleController {
         } catch (e) {
             throw new HttpException(SCHEDULE_DELETE_ERROR, HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @Delete('/delete/:id')
+    async hardDelete(@Param('id') id: string) {
+        await this.checkId(id);
+        return this.scheduleService.hardDelete(id);
     }
 
     @Patch('updateStatus/:id/:status')

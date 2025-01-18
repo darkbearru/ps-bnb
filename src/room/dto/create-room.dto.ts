@@ -1,41 +1,36 @@
 import { RoomTypes } from '../room.types';
-import { IsArray, IsEnum, IsNumber, IsOptional, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
+import { IsArray, IsEnum, IsNumber, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
 import {
     ROOM_AMENITIES_ERROR,
     ROOM_DESCRIPTION_ERROR,
-    ROOM_MAX_LENGTH_ERROR, ROOM_MAX_SQUARE_ERROR,
-    ROOM_MIN_LENGTH_ERROR, ROOM_MIN_SQUARE_ERROR,
-    ROOM_NAME_ERROR, ROOM_NUMBER_ERROR,
-    ROOM_SQUARE_ERROR,
+    ROOM_MAX_LENGTH_ERROR,
+    ROOM_MAX_SQUARE_ERROR,
+    ROOM_MIN_LENGTH_ERROR,
+    ROOM_MIN_SQUARE_ERROR,
+    ROOM_NAME_ERROR, ROOM_NUMBER_ERROR, ROOM_SQUARE_ERROR,
     ROOM_TYPE_ERROR,
 } from '../room.constants';
 
-export class UpdateRoomDto {
-    @IsOptional()
+export class CreateRoomDto {
     @IsNumber({}, { message: ROOM_NUMBER_ERROR })
-    num?: number;
+    num: number;
 
-    @IsOptional()
     @IsEnum(RoomTypes, { message: ROOM_TYPE_ERROR })
-    type?: RoomTypes;
+    type: RoomTypes;
 
-    @IsOptional()
     @IsString({ message: ROOM_NAME_ERROR })
     @MinLength(4, { message: ROOM_MIN_LENGTH_ERROR })
     @MaxLength( 50, { message: ROOM_MAX_LENGTH_ERROR })
-    name?: string;
+    name: string;
 
-    @IsOptional()
     @IsNumber({}, { message: ROOM_SQUARE_ERROR })
     @Min(10, { message: ROOM_MIN_SQUARE_ERROR })
     @Max(2000, { message: ROOM_MAX_SQUARE_ERROR })
-    square?: number;
+    square: number;
 
-    @IsOptional()
     @IsString({ message: ROOM_DESCRIPTION_ERROR })
-    description?: string;
+    description: string;
 
-    @IsOptional()
     @IsArray({ message: ROOM_AMENITIES_ERROR })
-    amenities?: string[];
+    amenities: string[];
 }
