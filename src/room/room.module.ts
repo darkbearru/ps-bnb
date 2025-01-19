@@ -6,23 +6,23 @@ import { RoomModel, RoomSchema } from './room.model/room.model';
 import { ScheduleModel, ScheduleSchema } from '../schedule/schedule.model/schedule.model';
 
 @Module({
-    controllers: [RoomController],
-    imports: [
-        MongooseModule.forFeature([
-            {
-                name: RoomModel.name,
-                schema: RoomSchema,
-                collection: 'Room',
-            },
-        ]),
-        MongooseModule.forFeature([
-            {
-                name: ScheduleModel.name,
-                schema: ScheduleSchema,
-                collection: 'schedule',
-            },
-        ]),
-    ],
-    providers: [RoomService]
+	controllers: [RoomController],
+	imports: [
+		MongooseModule.forFeature([
+			{
+				name: RoomModel.name,
+				schema: RoomSchema,
+				collection: 'Room',
+			},
+		]),
+		MongooseModule.forFeature([
+			{
+				name: ScheduleModel.name,
+				schema: ScheduleSchema,
+				collection: 'schedule',
+			},
+		]),
+	],
+	providers: [RoomService],
 })
 export class RoomModule {}

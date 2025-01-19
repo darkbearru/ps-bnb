@@ -1,21 +1,23 @@
 import {
-    Body,
-    Controller,
-    Delete,
-    HttpException,
-    HttpStatus,
-    Param,
-    Patch,
-    Post,
-    UsePipes,
-    ValidationPipe,
+	Body,
+	Controller,
+	Delete,
+	HttpException,
+	HttpStatus,
+	Param,
+	Patch,
+	Post,
+	UsePipes,
+	ValidationPipe,
 } from '@nestjs/common';
 import { ScheduleService } from './schedule.service';
 import {
-    SCHEDULE_CREATE_ERROR, SCHEDULE_DELETE_ERROR,
-    SCHEDULE_NOT_FOUND,
-    SCHEDULE_STATUS_ERROR,
-    SCHEDULE_UPDATE_ERROR, SCHEDULE_UPDATE_STATUS_ERROR,
+	SCHEDULE_CREATE_ERROR,
+	SCHEDULE_DELETE_ERROR,
+	SCHEDULE_NOT_FOUND,
+	SCHEDULE_STATUS_ERROR,
+	SCHEDULE_UPDATE_ERROR,
+	SCHEDULE_UPDATE_STATUS_ERROR,
 } from './schedule.constants';
 import { ScheduleStatus } from './schedule.types';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
@@ -24,83 +26,77 @@ import { ScheduleModel } from './schedule.model/schedule.model';
 
 @Controller('schedule')
 export class ScheduleController {
+	constructor(private readonly scheduleService: ScheduleService) {}
 
-    constructor(private readonly scheduleService: ScheduleService) {}
+	@UsePipes(new ValidationPipe())
+	@Post('create')
+	async create(@Body() dto: CreateScheduleDto) {
+		let check: ScheduleModel;
+		try {
+			check = await this.scheduleService.checkRoom(dto);
+		} catch (error) {
+			throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		if (check) {
+			throw new HttpException(SCHEDULE_CREATE_ERROR, HttpStatus.BAD_REQUEST);
+		}
+		let added: ScheduleModel;
+		try {
+			added = await this.scheduleService.create(dto);
+		} catch (error) {}
+		if (!added) {
+			throw new HttpException(SCHEDULE_CREATE_ERROR, HttpStatus.BAD_REQUEST);
+		}
+		return added;
+	}
 
-    @UsePipes(new ValidationPipe())
-    @Post('create')
-    async create(@Body() dto: CreateScheduleDto) {
-        let check: ScheduleModel;
-        try {
-            check = await this.scheduleService.checkRoom(dto);
-        } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        if (check) {
-            throw new HttpException(SCHEDULE_CREATE_ERROR, HttpStatus.BAD_REQUEST);
-        }
-        let added: ScheduleModel;
-        try {
-            added = await this.scheduleService.create(dto);
-        } catch (error) {}
-        if (!added) {
-            throw new HttpException(SCHEDULE_CREATE_ERROR, HttpStatus.BAD_REQUEST);
-        }
-        return added;
-    }
+	@UsePipes(new ValidationPipe())
+	@Patch(':id')
+	async update(@Param('id') id: string, @Body() dto: UpdateScheduleDto) {
+		await this.checkId(id);
+		try {
+			return await this.scheduleService.update(id, dto);
+		} catch (e) {
+			throw new HttpException(SCHEDULE_UPDATE_ERROR, HttpStatus.BAD_REQUEST);
+		}
+	}
 
-    @UsePipes(new ValidationPipe())
-    @Patch(':id')
-    async update(@Param('id') id: string, @Body() dto: UpdateScheduleDto) {
-        await this.checkId(id);
-        try {
-            return await this.scheduleService.update(id, dto);
-        } catch (e) {
-            throw new HttpException(SCHEDULE_UPDATE_ERROR, HttpStatus.BAD_REQUEST);
-        }
-    }
+	@Delete(':id')
+	async delete(@Param('id') id: string) {
+		await this.checkId(id);
+		try {
+			return await this.scheduleService.delete(id);
+		} catch (e) {
+			throw new HttpException(SCHEDULE_DELETE_ERROR, HttpStatus.BAD_REQUEST);
+		}
+	}
 
-    @Delete(':id')
-    async delete(@Param('id') id: string) {
-        await this.checkId(id);
-        try {
-            return await this.scheduleService.delete(id);
-        } catch (e) {
-            throw new HttpException(SCHEDULE_DELETE_ERROR, HttpStatus.BAD_REQUEST);
-        }
-    }
+	@Delete('/delete/:id')
+	async hardDelete(@Param('id') id: string) {
+		await this.checkId(id);
+		return this.scheduleService.hardDelete(id);
+	}
 
-    @Delete('/delete/:id')
-    async hardDelete(@Param('id') id: string) {
-        await this.checkId(id);
-        return this.scheduleService.hardDelete(id);
-    }
+	@Patch('updateStatus/:id/:status')
+	async updateStatus(@Param('id') id: string, @Param('status') status: number) {
+		await this.checkId(id);
+		if (!(status in Object.values(ScheduleStatus))) {
+			throw new HttpException(SCHEDULE_STATUS_ERROR, HttpStatus.BAD_REQUEST);
+		}
+		try {
+			return this.scheduleService.changeStatus(id, status);
+		} catch (e) {
+			throw new HttpException(SCHEDULE_UPDATE_STATUS_ERROR, HttpStatus.BAD_REQUEST);
+		}
+	}
 
-    @Patch('updateStatus/:id/:status')
-    async updateStatus(
-        @Param('id') id: string,
-        @Param('status') status: number
-    ) {
-        await this.checkId(id);
-        if (!(status in Object.values(ScheduleStatus))) {
-            throw new HttpException(SCHEDULE_STATUS_ERROR, HttpStatus.BAD_REQUEST);
-        }
-        try {
-            return this.scheduleService.changeStatus(id, status);
-        } catch (e) {
-            throw new HttpException(SCHEDULE_UPDATE_STATUS_ERROR, HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    private async checkId(id: string): Promise<void> {
-        let service: ScheduleModel;
-        try {
-            service = await this.scheduleService.findById(id);
-        } catch (error) {}
-        if (!service) {
-            throw new HttpException(SCHEDULE_NOT_FOUND, HttpStatus.NOT_FOUND);
-        }
-    }
-
-
+	private async checkId(id: string): Promise<void> {
+		let service: ScheduleModel;
+		try {
+			service = await this.scheduleService.findById(id);
+		} catch (error) {}
+		if (!service) {
+			throw new HttpException(SCHEDULE_NOT_FOUND, HttpStatus.NOT_FOUND);
+		}
+	}
 }

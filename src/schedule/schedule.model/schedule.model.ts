@@ -7,17 +7,17 @@ export type ScheduleDocument = HydratedDocument<ScheduleModel>;
 
 @Schema({ _id: true, timestamps: false })
 export class ScheduleModel {
-    @Prop()
-    startAt: Date;
+	@Prop()
+	startAt: Date;
 
-    @Prop()
-    endAt: Date;
+	@Prop()
+	endAt: Date;
 
-    @Prop({ enum: ScheduleStatus })
-    status: ScheduleStatus;
+	@Prop({ enum: ScheduleStatus })
+	status: ScheduleStatus;
 
-    @Prop({ type:  mongoose.Schema.Types.ObjectId, ref: RoomModel.name })
-    roomId: RoomModel;
+	@Prop({ type: mongoose.Schema.Types.ObjectId, ref: RoomModel.name })
+	roomId: RoomModel;
 }
 
 export const ScheduleSchema = SchemaFactory.createForClass(ScheduleModel);
