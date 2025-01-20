@@ -7,6 +7,7 @@ import {
 	Param,
 	Patch,
 	Post,
+	UseGuards,
 	UsePipes,
 	ValidationPipe,
 } from '@nestjs/common';
@@ -23,14 +24,22 @@ import { ScheduleStatus } from './schedule.types';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { ScheduleModel } from './schedule.model/schedule.model';
+import { Roles } from '../decorators/auth-roles.decorator';
+import { UserRole } from '../users/users.roles';
+import { AccessTokenGuard } from '../auth/guards/access-token.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { UserPayload } from '../decorators/user-payload.decorator';
+import { JwtPayload } from '../types/jwt.types';
 
 @Controller('schedule')
 export class ScheduleController {
 	constructor(private readonly scheduleService: ScheduleService) {}
 
+	@UseGuards(AccessTokenGuard, RolesGuard)
+	@Roles(UserRole.USER)
 	@UsePipes(new ValidationPipe())
 	@Post('create')
-	async create(@Body() dto: CreateScheduleDto) {
+	async create(@Body() dto: CreateScheduleDto, @UserPayload() payload: JwtPayload) {
 		let check: ScheduleModel;
 		try {
 			check = await this.scheduleService.checkRoom(dto);
@@ -42,14 +51,18 @@ export class ScheduleController {
 		}
 		let added: ScheduleModel;
 		try {
-			added = await this.scheduleService.create(dto);
-		} catch (error) {}
+			added = await this.scheduleService.create(dto, payload.id);
+		} catch (error) {
+			console.log(error);
+		}
 		if (!added) {
 			throw new HttpException(SCHEDULE_CREATE_ERROR, HttpStatus.BAD_REQUEST);
 		}
 		return added;
 	}
 
+	@UseGuards(AccessTokenGuard, RolesGuard)
+	@Roles(UserRole.USER)
 	@UsePipes(new ValidationPipe())
 	@Patch(':id')
 	async update(@Param('id') id: string, @Body() dto: UpdateScheduleDto) {
@@ -61,22 +74,29 @@ export class ScheduleController {
 		}
 	}
 
+	@UseGuards(AccessTokenGuard, RolesGuard)
+	@Roles(UserRole.USER)
 	@Delete(':id')
 	async delete(@Param('id') id: string) {
 		await this.checkId(id);
 		try {
 			return await this.scheduleService.delete(id);
-		} catch (e) {
+		} catch (error) {
+			console.log(error);
 			throw new HttpException(SCHEDULE_DELETE_ERROR, HttpStatus.BAD_REQUEST);
 		}
 	}
 
+	@UseGuards(AccessTokenGuard, RolesGuard)
+	@Roles(UserRole.ADMIN)
 	@Delete('/delete/:id')
 	async hardDelete(@Param('id') id: string) {
 		await this.checkId(id);
 		return this.scheduleService.hardDelete(id);
 	}
 
+	@UseGuards(AccessTokenGuard, RolesGuard)
+	@Roles(UserRole.ADMIN)
 	@Patch('updateStatus/:id/:status')
 	async updateStatus(@Param('id') id: string, @Param('status') status: number) {
 		await this.checkId(id);
@@ -85,7 +105,8 @@ export class ScheduleController {
 		}
 		try {
 			return this.scheduleService.changeStatus(id, status);
-		} catch (e) {
+		} catch (error) {
+			console.log(error);
 			throw new HttpException(SCHEDULE_UPDATE_STATUS_ERROR, HttpStatus.BAD_REQUEST);
 		}
 	}
@@ -94,7 +115,9 @@ export class ScheduleController {
 		let service: ScheduleModel;
 		try {
 			service = await this.scheduleService.findById(id);
-		} catch (error) {}
+		} catch (error) {
+			console.log(error);
+		}
 		if (!service) {
 			throw new HttpException(SCHEDULE_NOT_FOUND, HttpStatus.NOT_FOUND);
 		}

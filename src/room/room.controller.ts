@@ -9,6 +9,7 @@ import {
 	Param,
 	Patch,
 	Post,
+	UseGuards,
 	UsePipes,
 	ValidationPipe,
 } from '@nestjs/common';
@@ -22,11 +23,17 @@ import {
 } from './room.constants';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { RoomModel } from './room.model/room.model';
+import { Roles } from '../decorators/auth-roles.decorator';
+import { AccessTokenGuard } from '../auth/guards/access-token.guard';
+import { UserRole } from '../users/users.roles';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @Controller('room')
 export class RoomController {
 	constructor(private readonly roomService: RoomService) {}
 
+	@UseGuards(AccessTokenGuard, RolesGuard)
+	@Roles(UserRole.ADMIN)
 	@UsePipes(new ValidationPipe())
 	@Post('create')
 	async create(@Body() dto: CreateRoomDto) {
@@ -65,6 +72,8 @@ export class RoomController {
 		return room;
 	}
 
+	@UseGuards(AccessTokenGuard, RolesGuard)
+	@Roles(UserRole.ADMIN)
 	@UsePipes(new ValidationPipe())
 	@Patch(':id')
 	async update(@Param('id') id: string, @Body() dto: UpdateRoomDto) {
@@ -87,6 +96,8 @@ export class RoomController {
 		}
 	}
 
+	@UseGuards(AccessTokenGuard, RolesGuard)
+	@Roles(UserRole.ADMIN)
 	@Delete(':id')
 	async delete(@Param('id') id: string) {
 		let room: RoomModel;
@@ -106,6 +117,8 @@ export class RoomController {
 		}
 	}
 
+	@UseGuards(AccessTokenGuard, RolesGuard)
+	@Roles(UserRole.ADMIN)
 	@Delete('delete/:id')
 	async hardDelete(@Param('id') id: string) {
 		const deleted = await this.roomService.hardDelete(id);
