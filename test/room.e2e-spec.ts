@@ -193,7 +193,7 @@ describe('Room (e2e)', () => {
 	});
 
 	it('/api/room/:id (Get): fail, bad id format', async () => {
-		return request(app.getHttpServer()).get(`/api/room/3213`).expect(404);
+		return request(app.getHttpServer()).get(`/api/room/3213`).expect(400);
 	});
 
 	it('/api/room/:id (Patch): success', async () => {
@@ -347,6 +347,16 @@ describe('Room (e2e)', () => {
 			.delete(`/api/room/delete/${roomId}`)
 			.set('Authorization', `Bearer ${user.accessToken}`)
 			.expect(403);
+	});
+
+	it('/api/room/stats/:year/:month/ (Statistics): success', async () => {
+		return request(app.getHttpServer())
+			.get(`/api/room/stats/2010/1/`)
+			.set('Authorization', `Bearer ${admin.accessToken}`)
+			.expect(200)
+			.then(({ body }: request.Response) => {
+				expect(body.length).toBe(0);
+			});
 	});
 
 	afterAll(async () => {

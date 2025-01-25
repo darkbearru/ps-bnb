@@ -25,6 +25,7 @@ import { AUTH_BAD_REQUEST_ERROR } from './auth.constants';
 import { RolesGuard } from './guards/roles.guard';
 import { Roles } from '../decorators/auth-roles.decorator';
 import { UserRole } from '../users/users.roles';
+import { IdValidationPipe } from './pipes/id-validation.pipe';
 
 @Controller('auth')
 export class AuthController {
@@ -63,7 +64,7 @@ export class AuthController {
 	@UseGuards(AccessTokenGuard, RolesGuard)
 	@Roles(UserRole.ADMIN)
 	@Delete('delete/:id')
-	async delete(@Param('id') id: string) {
+	async delete(@Param('id', IdValidationPipe) id: string) {
 		return this.authService.delete(id);
 	}
 }

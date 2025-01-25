@@ -30,6 +30,7 @@ import { AccessTokenGuard } from '../auth/guards/access-token.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { UserPayload } from '../decorators/user-payload.decorator';
 import { JwtPayload } from '../types/jwt.types';
+import { IdValidationPipe } from '../auth/pipes/id-validation.pipe';
 
 @Controller('schedule')
 export class ScheduleController {
@@ -65,11 +66,12 @@ export class ScheduleController {
 	@Roles(UserRole.USER)
 	@UsePipes(new ValidationPipe())
 	@Patch(':id')
-	async update(@Param('id') id: string, @Body() dto: UpdateScheduleDto) {
+	async update(@Param('id', IdValidationPipe) id: string, @Body() dto: UpdateScheduleDto) {
 		await this.checkId(id);
 		try {
 			return await this.scheduleService.update(id, dto);
 		} catch (e) {
+			console.log(e);
 			throw new HttpException(SCHEDULE_UPDATE_ERROR, HttpStatus.BAD_REQUEST);
 		}
 	}
@@ -77,7 +79,7 @@ export class ScheduleController {
 	@UseGuards(AccessTokenGuard, RolesGuard)
 	@Roles(UserRole.USER)
 	@Delete(':id')
-	async delete(@Param('id') id: string) {
+	async delete(@Param('id', IdValidationPipe) id: string) {
 		await this.checkId(id);
 		try {
 			return await this.scheduleService.delete(id);
@@ -90,7 +92,7 @@ export class ScheduleController {
 	@UseGuards(AccessTokenGuard, RolesGuard)
 	@Roles(UserRole.ADMIN)
 	@Delete('/delete/:id')
-	async hardDelete(@Param('id') id: string) {
+	async hardDelete(@Param('id', IdValidationPipe) id: string) {
 		await this.checkId(id);
 		return this.scheduleService.hardDelete(id);
 	}
@@ -98,7 +100,7 @@ export class ScheduleController {
 	@UseGuards(AccessTokenGuard, RolesGuard)
 	@Roles(UserRole.ADMIN)
 	@Patch('updateStatus/:id/:status')
-	async updateStatus(@Param('id') id: string, @Param('status') status: number) {
+	async updateStatus(@Param('id', IdValidationPipe) id: string, @Param('status') status: number) {
 		await this.checkId(id);
 		if (!(status in Object.values(ScheduleStatus))) {
 			throw new HttpException(SCHEDULE_STATUS_ERROR, HttpStatus.BAD_REQUEST);
