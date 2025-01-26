@@ -13,9 +13,10 @@ export class ScheduleService {
 		private scheduleModel: Model<ScheduleDocument>,
 	) {}
 
-	async create(dto: CreateScheduleDto) {
+	async create(dto: CreateScheduleDto, userId: string): Promise<ScheduleModel> {
 		return await this.scheduleModel.create({
 			...dto,
+			userId,
 			status: ScheduleStatus.Pending,
 		});
 	}

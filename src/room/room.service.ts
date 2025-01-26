@@ -54,4 +54,36 @@ export class RoomService {
 		}
 		return deleted;
 	}
+
+	async getStats(month: number, year: number) {
+		const range = this.getDateRange(month, year);
+		return this.scheduleModel
+			.aggregate()
+			.match({
+				$and: [{ startAt: { $gt: range.start } }, { startAt: { $lte: range.end } }],
+				status: { $eq: ScheduleStatus.Completed },
+			})
+			.lookup({
+				from: 'Room',
+				localField: 'roomId',
+				foreignField: '_id',
+				as: 'rooms',
+			})
+			.unwind('rooms')
+			.group({
+				_id: '$rooms._id',
+				roomName: { $first: '$rooms.name' },
+				bookingCount: { $sum: 1 },
+			})
+			.sort({
+				roomName: 1,
+			});
+	}
+
+	private getDateRange(month: number, year: number) {
+		return {
+			start: new Date(year, month, 1, 0, 0),
+			end: new Date(year, month + 1, 0, 0, 0),
+		};
+	}
 }

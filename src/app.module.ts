@@ -4,9 +4,10 @@ import { RoomModule } from './room/room.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getMongoConfig } from './config/mongo.config';
-import { UsersService } from './users/users.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { RolesGuard } from './auth/guards/roles.guard';
 
 @Module({
 	imports: [
@@ -22,6 +23,13 @@ import { AuthModule } from './auth/auth.module';
 		AuthModule,
 	],
 	controllers: [],
-	providers: [UsersService],
+	providers: [
+		/*
+		{
+			provide: APP_GUARD,
+			useClass: RolesGuard,
+		},
+*/
+	],
 })
 export class AppModule {}
