@@ -9,10 +9,13 @@ import {
 	MaxLength,
 	Min,
 	MinLength,
+	ValidateNested,
 } from 'class-validator';
 import {
 	ROOM_AMENITIES_ERROR,
 	ROOM_DESCRIPTION_ERROR,
+	ROOM_IMAGES_ARRAY_ERROR,
+	ROOM_IMAGES_ERROR,
 	ROOM_MAX_LENGTH_ERROR,
 	ROOM_MAX_SQUARE_ERROR,
 	ROOM_MIN_LENGTH_ERROR,
@@ -22,6 +25,8 @@ import {
 	ROOM_SQUARE_ERROR,
 	ROOM_TYPE_ERROR,
 } from '../room.constants';
+import { Type } from 'class-transformer';
+import { RoomImagesDto } from './create-room.dto';
 
 export class UpdateRoomDto {
 	@IsOptional()
@@ -50,5 +55,12 @@ export class UpdateRoomDto {
 
 	@IsOptional()
 	@IsArray({ message: ROOM_AMENITIES_ERROR })
+	@IsString({ each: true, message: ROOM_IMAGES_ERROR })
 	amenities?: string[];
+
+	@IsOptional()
+	@IsArray({ message: ROOM_IMAGES_ERROR })
+	@ValidateNested({ message: ROOM_IMAGES_ARRAY_ERROR })
+	@Type(() => RoomImagesDto)
+	images: RoomImagesDto[];
 }

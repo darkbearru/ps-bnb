@@ -6,8 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getMongoConfig } from './config/mongo.config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { APP_GUARD } from '@nestjs/core';
-import { RolesGuard } from './auth/guards/roles.guard';
+import { FilesModule } from './files/files.module';
 
 @Module({
 	imports: [
@@ -21,15 +20,8 @@ import { RolesGuard } from './auth/guards/roles.guard';
 		RoomModule,
 		UsersModule,
 		AuthModule,
+		FilesModule,
 	],
 	controllers: [],
-	providers: [
-		/*
-		{
-			provide: APP_GUARD,
-			useClass: RolesGuard,
-		},
-*/
-	],
 })
 export class AppModule {}
