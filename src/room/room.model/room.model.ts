@@ -4,6 +4,13 @@ import { HydratedDocument } from 'mongoose';
 
 export type RoomDocument = HydratedDocument<RoomModel>;
 
+export class RoomImages {
+	@Prop()
+	name: string;
+
+	@Prop()
+	url: string;
+}
 @Schema({ timestamps: true, _id: true })
 export class RoomModel {
 	@Prop()
@@ -26,6 +33,9 @@ export class RoomModel {
 
 	@Prop()
 	isDeleted: boolean;
+
+	@Prop({ type: () => [RoomImages], _id: false })
+	images: RoomImages[];
 }
 
 export const RoomSchema = SchemaFactory.createForClass(RoomModel);

@@ -8,6 +8,8 @@ import { RoomTypes } from '../src/room/room.types';
 import {
 	ROOM_AMENITIES_ERROR,
 	ROOM_DESCRIPTION_ERROR,
+	ROOM_IMAGES_ARRAY_ERROR,
+	ROOM_IMAGES_ERROR,
 	ROOM_MAX_LENGTH_ERROR,
 	ROOM_MAX_SQUARE_ERROR,
 	ROOM_MIN_LENGTH_ERROR,
@@ -29,6 +31,12 @@ const roomDto: CreateRoomDto = {
 	square: 25,
 	description: 'Просто однокомнатная квартира',
 	amenities: ['Чайник', 'Кофемашина', 'Холодильник'],
+	images: [
+		{
+			url: '2025-01-28/IMG_8153.webp',
+			name: 'IMG_8153.webp',
+		},
+	],
 };
 
 describe('Room (e2e)', () => {
@@ -157,7 +165,7 @@ describe('Room (e2e)', () => {
 			});
 	});
 
-	it('/api/room/create (Post): fail, description', () => {
+	it('/api/room/create (Post): fail, description', async () => {
 		return request(app.getHttpServer())
 			.post('/api/room/create')
 			.set('Authorization', `Bearer ${admin.accessToken}`)
@@ -168,7 +176,7 @@ describe('Room (e2e)', () => {
 			});
 	});
 
-	it('/api/room/create (Post): fail, amenities', () => {
+	it('/api/room/create (Post): fail, amenities', async () => {
 		return request(app.getHttpServer())
 			.post('/api/room/create')
 			.set('Authorization', `Bearer ${admin.accessToken}`)
@@ -176,6 +184,28 @@ describe('Room (e2e)', () => {
 			.expect(400)
 			.then(({ body }: request.Response) => {
 				expect(body.message.indexOf(ROOM_AMENITIES_ERROR)).not.toBe(-1);
+			});
+	});
+
+	it('/api/room/create (Post): fail, images', async () => {
+		return request(app.getHttpServer())
+			.post('/api/room/create')
+			.set('Authorization', `Bearer ${admin.accessToken}`)
+			.send({ ...roomDto, images: 5 })
+			.expect(400)
+			.then(({ body }: request.Response) => {
+				expect(body.message.indexOf(ROOM_IMAGES_ERROR)).not.toBe(-1);
+			});
+	});
+
+	it('/api/room/create (Post): fail, images, bad format array', async () => {
+		return request(app.getHttpServer())
+			.post('/api/room/create')
+			.set('Authorization', `Bearer ${admin.accessToken}`)
+			.send({ ...roomDto, images: ['5'] })
+			.expect(400)
+			.then(({ body }: request.Response) => {
+				expect(body.message.indexOf('images.' + ROOM_IMAGES_ARRAY_ERROR)).not.toBe(-1);
 			});
 	});
 
@@ -295,7 +325,7 @@ describe('Room (e2e)', () => {
 			});
 	});
 
-	it('/api/room/:id (Patch): fail, description', () => {
+	it('/api/room/:id (Patch): fail, description', async () => {
 		return request(app.getHttpServer())
 			.patch(`/api/room/${roomId}`)
 			.set('Authorization', `Bearer ${admin.accessToken}`)
@@ -306,7 +336,7 @@ describe('Room (e2e)', () => {
 			});
 	});
 
-	it('/api/room/:id (Patch): fail, amenities', () => {
+	it('/api/room/:id (Patch): fail, amenities', async () => {
 		return request(app.getHttpServer())
 			.patch(`/api/room/${roomId}`)
 			.set('Authorization', `Bearer ${admin.accessToken}`)
@@ -314,6 +344,28 @@ describe('Room (e2e)', () => {
 			.expect(400)
 			.then(({ body }: request.Response) => {
 				expect(body.message.indexOf(ROOM_AMENITIES_ERROR)).not.toBe(-1);
+			});
+	});
+
+	it('/api/room/:id (Patch): fail, images', async () => {
+		return request(app.getHttpServer())
+			.patch(`/api/room/${roomId}`)
+			.set('Authorization', `Bearer ${admin.accessToken}`)
+			.send({ ...roomDto, images: 5 })
+			.expect(400)
+			.then(({ body }: request.Response) => {
+				expect(body.message.indexOf(ROOM_IMAGES_ERROR)).not.toBe(-1);
+			});
+	});
+
+	it('/api/room/:id (Patch): fail, images, bad format array', async () => {
+		return request(app.getHttpServer())
+			.patch(`/api/room/${roomId}`)
+			.set('Authorization', `Bearer ${admin.accessToken}`)
+			.send({ ...roomDto, images: ['5'] })
+			.expect(400)
+			.then(({ body }: request.Response) => {
+				expect(body.message.indexOf('images.' + ROOM_IMAGES_ARRAY_ERROR)).not.toBe(-1);
 			});
 	});
 

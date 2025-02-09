@@ -12,4 +12,9 @@ export const ROOM_MIN_SQUARE_ERROR = 'Минимальная площадь но
 export const ROOM_MAX_SQUARE_ERROR = 'Максимальная площадь номера до 2000 кв. м.';
 export const ROOM_DESCRIPTION_ERROR = 'Описание номера должно быть текстовым';
 export const ROOM_AMENITIES_ERROR = 'Список удобств должен быть текстовым массивом';
+export const ROOM_IMAGES_ERROR = 'Список изображений должен быть массивом';
 export const ROOM_INTERNAL_ERROR = 'Ошибка формирования данных';
+export const ROOM_IMAGE_NAME_ERROR = 'Имя изображения должно быть строкой';
+export const ROOM_IMAGE_URL_ERROR = 'URL изображения должно быть строкой';
+export const ROOM_IMAGES_ARRAY_ERROR =
+	'Массив изображений должен быть вида { name: "Image name", url: "Image url"}';

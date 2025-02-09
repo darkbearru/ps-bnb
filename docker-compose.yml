@@ -1,0 +1,10 @@
+version: '3'
+services:
+  ps.bnb:
+    image: ps-bnb:latest
+    container_name: ps-bnb
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./.env:/www/ps_bnb/.env
