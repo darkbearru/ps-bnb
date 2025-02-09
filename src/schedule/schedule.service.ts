@@ -5,12 +5,17 @@ import { ScheduleStatus } from './schedule.types';
 import { Model } from 'mongoose';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
+import { RoomService } from '../room/room.service';
+import { TelegramService } from '../telegram/telegram.service';
+import { JwtPayload } from '../types/jwt.types';
 
 @Injectable()
 export class ScheduleService {
 	constructor(
 		@InjectModel(ScheduleModel.name)
 		private scheduleModel: Model<ScheduleDocument>,
+		private readonly roomService: RoomService,
+		private readonly telegramService: TelegramService,
 	) {}
 
 	async create(dto: CreateScheduleDto, userId: string): Promise<ScheduleModel> {
@@ -90,5 +95,16 @@ export class ScheduleService {
 
 	async hardDelete(id: string) {
 		return this.scheduleModel.deleteOne({ _id: id });
+	}
+
+	async notification(payload: JwtPayload, dto: CreateScheduleDto): Promise<void> {
+		const room = await this.roomService.findById(dto.roomId);
+		if (!room) return;
+		console.log('room', room);
+		const message: string =
+			`Забронирована комната: ${room.name}\n` +
+			`c ${dto.startAt} по ${dto.endAt}\n` +
+			`Клиент: ${payload.name} (${payload.phone})\n`;
+		return this.telegramService.sendMessage(message);
 	}
 }

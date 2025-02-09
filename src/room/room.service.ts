@@ -50,7 +50,7 @@ export class RoomService {
 	async hardDelete(id: string) {
 		const deleted = await this.roomModel.deleteOne({ _id: id }).exec();
 		if (deleted) {
-			await this.scheduleModel.updateMany({ roomId: id }).exec();
+			await this.scheduleModel.deleteMany({ roomId: id }).exec();
 		}
 		return deleted;
 	}
