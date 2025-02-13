@@ -24,5 +24,6 @@ import { ScheduleModel, ScheduleSchema } from '../schedule/schedule.model/schedu
 		]),
 	],
 	providers: [RoomService],
+	exports: [RoomService],
 })
 export class RoomModule {}

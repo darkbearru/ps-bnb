@@ -59,6 +59,7 @@ export class ScheduleController {
 		if (!added) {
 			throw new HttpException(SCHEDULE_CREATE_ERROR, HttpStatus.BAD_REQUEST);
 		}
+		await this.scheduleService.notification(payload, dto);
 		return added;
 	}
 
